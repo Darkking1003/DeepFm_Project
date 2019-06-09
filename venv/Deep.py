@@ -21,11 +21,11 @@ from tensorflow.python.keras import optimizers
 
 Epoch_num=1001
 batch_size=500
-Embd_Size=500
-learning_rate = 0.0001
+Embd_Size=300
+learning_rate = 0.001
 momentumRate=0.01
 DropOutRate=0.2
-Scale=0.0225#0.005
+Scale=0.01#0.005
 Scale_emb=0.01 #0.01
 Relu_alpha=0.05
 Training=True
@@ -56,7 +56,7 @@ Train_data="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Trainin
 Validation_data="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Validation_data.csv"
 Test_data="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Test_data.csv"
 
-Results_Adress="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Results/DeepFMResults.csv"
+Results_Adress="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Results/DeepResults.csv"
 
 User=np.load(User_address)
 Movie=np.load(Movie_Address)
@@ -94,7 +94,6 @@ def CreateInput(Userid,MovieId):
         elif feature in MovieId_Features:
             Input = np.concatenate((Input, Features.get(feature)[MovieId]), axis=1)
     return Input
-
 
 
 
@@ -136,99 +135,24 @@ def ReturnVektor(Input):
 # Movie_Input=Keras.Input((User_num,))
 Conc=Keras.Input((Input_Shape,))
 
-# U=Keras.Lambda(ReturnUser,output_shape=(User_num,))(Conc)
-# M=Keras.Lambda(ReturnMovie,output_shape=(User_num,))(Conc)
-
 U,M,G1,G2,A1,O,A2=Keras.Lambda(ReturnVektor)(Conc)
 
-U_Drop=Keras.Dropout(DropOutRate)(U)
-M_Drop=Keras.Dropout(DropOutRate)(M)
-G1_Drop=Keras.Dropout(DropOutRate)(G1)
-G2_Drop=Keras.Dropout(DropOutRate)(G2)
-A1_Drop=Keras.Dropout(DropOutRate)(A1)
-O_Drop=Keras.Dropout(DropOutRate)(O)
-A2_Drop=Keras.Dropout(DropOutRate)(A2)
+emb1=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(U)
 
-emb1=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(U_Drop)
-emb1_Drop=Keras.Dropout(DropOutRate)(emb1)
-emb1_alt=Keras.Reshape((1,-1))(emb1_Drop)
-emb2=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(M_Drop)
-emb2_Drop=Keras.Dropout(DropOutRate)(emb2)
-emb2_alt=Keras.Reshape((1,-1))(emb2_Drop)
-emb3=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(G1_Drop)
-emb3_Drop=Keras.Dropout(DropOutRate)(emb3)
-emb3_alt=Keras.Reshape((1,-1))(emb3_Drop)
-emb4=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(G2_Drop)
-emb4_Drop=Keras.Dropout(DropOutRate)(emb4)
-emb4_alt=Keras.Reshape((1,-1))(emb4_Drop)
-emb5=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(A1_Drop)
-emb5_Drop=Keras.Dropout(DropOutRate)(emb5)
-emb5_alt=Keras.Reshape((1,-1))(emb5_Drop)
-emb6=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(O_Drop)
-emb6_Drop=Keras.Dropout(DropOutRate)(emb6)
-emb6_alt=Keras.Reshape((1,-1))(emb6_Drop)
-emb7=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(A2_Drop)
-emb7_Drop=Keras.Dropout(DropOutRate)(emb7)
-emb7_alt=Keras.Reshape((1,-1))(emb7_Drop)
+emb2=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(M)
 
-# emb1=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(U)
-# # emb1_Drop=Keras.Dropout(DropOutRate)(emb1)
-# emb1_alt=Keras.Reshape((1,-1))(emb1)
-# emb2=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(M)
-# # emb2_Drop=Keras.Dropout(DropOutRate)(emb2)
-# emb2_alt=Keras.Reshape((1,-1))(emb2)
-# emb3=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(G1)
-# # emb3_Drop=Keras.Dropout(DropOutRate)(emb3)
-# emb3_alt=Keras.Reshape((1,-1))(emb3)
-#
-#
-# emb4=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(G2)
-#
-# # emb4_Drop=Keras.Dropout(DropOutRate)(emb4)
-# emb4_alt=Keras.Reshape((1,-1))(emb4)
-#
-# emb5=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(A1)
-#
-# # emb5_Drop=Keras.Dropout(DropOutRate)(emb5)
-# emb5_alt=Keras.Reshape((1,-1))(emb5)
-#
-# emb6=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(O)
-#
-# # emb6_Drop=Keras.Dropout(DropOutRate)(emb6)
-# emb6_alt=Keras.Reshape((1,-1))(emb6)
-#
-# emb7=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(A2)
-#
-# # emb7_Drop=Keras.Dropout(DropOutRate)(emb7)
-# emb7_alt=Keras.Reshape((1,-1))(emb7)
+emb3=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(G1)
+
+emb4=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(G2)
+
+emb5=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(A1)
+
+emb6=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(O)
+
+emb7=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(A2)
 
 
-
-
-
-y_fm_1d=Keras.Dense(1,activation='linear',kernel_regularizer=regularizers.l2(Scale))(Conc)
-y_fm_1d=Keras.Reshape((1,))(y_fm_1d)
-
-embed_2d=Keras.Concatenate(axis=1)([emb1_alt,emb2_alt,emb3_alt,emb4_alt,emb5_alt,emb6_alt,emb7_alt])
-
-tensor_sum = Keras.Lambda(lambda x: K.sum(x, axis = 1), name = 'sum_of_tensors')
-tensor_square = Keras.Lambda(lambda x: K.square(x), name = 'square_of_tensors')
-
-sum_of_embed = tensor_sum(embed_2d)
-square_of_embed = tensor_square(embed_2d)
-
-square_of_sum = Keras.Multiply()([sum_of_embed, sum_of_embed])
-sum_of_square = tensor_sum(square_of_embed)
-
-sub = Keras.Subtract()([square_of_sum, sum_of_square])
-y_fm_2d = Keras.Lambda(lambda x: x*0.5)(sub)
-y_fm_2d=Keras.Reshape((Embd_Size,))(y_fm_2d)
-# y_fm_2d = Keras.Reshape((1,), name = 'fm_2d_output')(tensor_sum(sub))
-
-# DenseLayer_Input=Keras.concatenate([emb1_Drop,emb2_Drop,emb3_Drop,emb4_Drop,emb5_Drop,emb6_Drop,emb7_Drop])
-DenseLayer_Input=Keras.concatenate([emb1_Drop,emb2_Drop,emb3_Drop,emb4_Drop,emb5_Drop,emb6_Drop,emb7_Drop])
-
-
+DenseLayer_Input=Keras.concatenate([emb1,emb2,emb3,emb4,emb5,emb6,emb7])
 
 # x1=Keras.Dense(400,activation="relu",  kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(DenseLayer_Input)
 x1=Keras.Dense(400,activation="relu",kernel_regularizer=regularizers.l2(Scale))(DenseLayer_Input)
@@ -237,15 +161,25 @@ x2=Keras.Dense(400,activation="relu",kernel_regularizer=regularizers.l2(Scale) )
 drop2=Keras.Dropout(DropOutRate)(x2)
 x3=Keras.Dense(400,activation="relu",kernel_regularizer=regularizers.l2(Scale))(drop2)
 drop3=Keras.Dropout(DropOutRate)(x3)
-# drop3=Keras.Reshape((1,400))(drop3)
-y=Keras.Concatenate()([y_fm_1d,y_fm_2d,drop3])
-Output=Keras.Dense(1, activation='linear',kernel_regularizer=regularizers.l2(Scale))(y)
+
+
+Output=Keras.Dense(1, activation='linear',kernel_regularizer=regularizers.l2(Scale))(drop3)
 
 model=tf.keras.Model(inputs=[Conc],outputs=Output)
 print(model.summary())
 
 
-
+# model = Sequential()
+# model.add(Keras.Dropout(DropOutRate,input_shape=(10352,)))
+# model.add(Keras.Dense(400, input_dim=10352, kernel_initializer='normal', activation='relu',kernel_regularizer=regularizers.l2(Scale)))
+# model.add(Keras.Dropout(DropOutRate))
+# model.add(Keras.Dense(400, activation='relu',kernel_regularizer=regularizers.l2(Scale)))
+# model.add(Keras.Dropout(DropOutRate))
+# model.add(Keras.Dense(400,activation='relu',kernel_regularizer=regularizers.l2(Scale)))
+# model.add(Keras.Dropout(DropOutRate))
+# model.add(Keras.Dense(400,activation='relu',kernel_regularizer=regularizers.l2(Scale)))
+# model.add(Keras.Dropout(DropOutRate))
+# model.add(Keras.Dense(1, activation='linear',kernel_regularizer=regularizers.l2(Scale)))
 Opt=optimizers.Adam(lr=learning_rate)
 model.compile(loss='mse', optimizer=Opt, metrics=['mse','mae'])
 
@@ -256,7 +190,6 @@ init_op_test = test_iterator.initializer
 init_op_valid=Validation_iterator.initializer
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
-
 File = open(Results_Adress, "w", encoding="utf8", newline='')
 File.close()
 with tf.Session(config=config) as sess:
@@ -310,7 +243,6 @@ with tf.Session(config=config) as sess:
         # result=[x/BatchN for x in Total]
         # print(model.metrics_names)
         # print("Total Validation Success: ", result)
-
 
         # if(epoch%10 ==0):
         #     pred=model.predict(input)

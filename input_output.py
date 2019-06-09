@@ -8,20 +8,28 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import normalize
 
 
-User_num=610
-Movie_num=9742
-User_address="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-latest-small/Processed/User_data.npy"
-Movie_Address="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-latest-small/Processed/Movie_data.npy"
-Genre_Address="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-latest-small/Processed/Genre.npy"
+# User_num=610
+# Movie_num=9742
+# User_num=6040+1
+# Movie_num=3882+1
+User_num=1041
+Movie_num=1883
+User_address="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/User_data.npy"
+Movie_Address="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Movie_data.npy"
+Genre_Address="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Genre.npy"
+Gender_Address="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Gender.npy"
+Age_Address="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Age.npy"
+Occupation_Address="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Occupation.npy"
+Area_Address="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Area.npy"
 Rating_Address="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-latest-small/ratings.csv"
 MovieInfo_Address="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-latest-small/movies.csv"
 new_MovieAddress="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-latest-small/Processed/movies.csv"
 new_RatingAddress="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-latest-small/Processed/ratings.csv"
-tmp_Ratings="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-latest-small/Processed/tmp_Ratings"
-TrainingAddress="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-latest-small/Processed/Training_data.csv"
-ValidationAddress="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-latest-small/Processed/Validation_data.csv"
-TestAddress="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-latest-small/Processed/Test_data.csv"
-User_MovieAdress="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-latest-small/Processed/UserMovie_data"
+tmp_Ratings="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/tmp_Ratings"
+TrainingAddress="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Training_data.csv"
+ValidationAddress="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Validation_data.csv"
+TestAddress="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Test_data.csv"
+User_MovieAdress="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/UserMovie_data"
 
 # User_Movie=np.load("C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-latest-small/Processed/User-Movie")
 # User_Movie=User_Movie.T
@@ -49,23 +57,20 @@ User_MovieAdress="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-latest-small/P
 # print(User_Movie)
 # np.save("C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-latest-small/Processed/Movie",User_Movie)
 
-def CountUserAndRatingNum():
+def CountUserAndRatingNum(Rating_Address,i):
     Users=set()
     with open(Rating_Address, "r",encoding="utf8") as file:
         csv_reader=csv.reader(file)
         line_count=0
         for row in csv_reader:
-            if line_count==0:
-                print(row)
-                line_count+=1
-                continue
+
             line_count+=1
-            if row[0] not in Users:
-                Users.add(row[0])
+            if row[i] not in Users:
+                Users.add(row[i])
 
     print(" User Count: ",len(Users)," ratings number: ",line_count)
 
-def FixMovies():
+def FixMovies(MovieInfo_Address,new_MovieAddress,Rating_Address,new_RatingAddress):
     with open(MovieInfo_Address, encoding="utf8") as file:
         csv_reader=csv.reader(file)
         line_count=0
@@ -76,14 +81,15 @@ def FixMovies():
         for row in csv_reader:
             if line_count == 0:
                 print(row)
-                line_count += 1
-                continue
+
             line_count+=1
             if line_count%10000==0:
                 print("line count: ",line_count)
             movies.append(int(row[0]))
             writer.writerow([str(movieCount),row[1],row[2]])
             movieCount += 1
+
+
 
     with open(Rating_Address,encoding="utf8") as file:
         csv_reader = csv.reader(file)
@@ -93,24 +99,21 @@ def FixMovies():
         for row in csv_reader:
             if (line_count == 0):
                 print(row)
-                writer.writerow(row)
-                line_count += 1
-                continue
             line_count += 1
             if (line_count % 100000 == 0):
                 print("line count: ", line_count)
             newId=movies.index(int(row[1]))
-            rating=int(math.ceil(float(row[2])))
-            if rating==0:
-                print("rating was 0")
-                rating=1
-            writer.writerow([str(int(row[0])-1),str(newId),rating,row[3]])
+            # rating=int(math.ceil(float(row[2])))
+            # if rating==0:
+            #     print("rating was 0")
+            #     rating=1
+            writer.writerow([row[0],str(newId),row[2],row[3]])
 
 def CreateTmpRatings():
     tmp_file=open(tmp_Ratings,"wb")
     for i in range(User_num):
         User_rating=[]
-        with open(new_RatingAddress, encoding="utf8") as file:
+        with open(Final_Ratings, encoding="utf8") as file:
             csv_reader = csv.reader(file)
             line_count = 0
             for row in csv_reader:
@@ -141,6 +144,7 @@ def TrainValidationTestSplit():
         print(user)
         if Total<5:
             TrainingNum=Total
+            print("Total is lower than 5 Total: ",Total)
         else:
             TrainingNum=math.ceil(Total*0.8)
         TestNum=Total-TrainingNum
@@ -148,6 +152,7 @@ def TrainValidationTestSplit():
             ValidationNum=math.ceil(TrainingNum*0.2)
             TrainingNum=TrainingNum-ValidationNum
         else:
+            print("Training is lower than 5 Training: ",TrainingNum)
             ValidationNum=0
 
         TrainWriter.writerows(user[:TrainingNum])
@@ -179,19 +184,19 @@ def CreateUserAndMovieMatrix():
             rating=int(float(row[2]))
 
             User_Movie[userid,movieid]=rating
-    print(User_Movie[0][2219])
+    print(User_Movie[112][260])
 
-    with open(ValidationAddress, "r", encoding="utf8") as file:
-        csv_reader = csv.reader(file)
-        line_count = 0
-
-        for row in csv_reader:
-            line_count += 1
-            userid = int(row[0])
-            movieid = int(row[1])
-            rating = int(float(row[2]))
-
-            User_Movie[userid, movieid] = rating
+    # with open(ValidationAddress, "r", encoding="utf8") as file:
+    #     csv_reader = csv.reader(file)
+    #     line_count = 0
+    #
+    #     for row in csv_reader:
+    #         line_count += 1
+    #         userid = int(row[0])
+    #         movieid = int(row[1])
+    #         rating = int(float(row[2]))
+    #
+    #         User_Movie[userid, movieid] = rating
 
     # with open(TestAddress, "r", encoding="utf8") as file:
     #     csv_reader = csv.reader(file)
@@ -266,7 +271,7 @@ def SeparateandNormalize():
 
 def CountGenres():
     Genres=set()
-    with open(new_MovieAddress, "r",encoding="utf8") as file:
+    with open(Final_Movie, "r",encoding="utf8") as file:
         csv_reader=csv.reader(file)
         line_count=0
         for row in csv_reader:
@@ -280,12 +285,10 @@ def CountGenres():
         print(Genres)
         print(len(Genres))
 
-
-
 def CreateGenreMatrix():
-    Genres=['Children', 'Horror', 'Fantasy', 'Thriller', 'Musical', 'Adventure', 'War', 'Western', 'Romance', 'Crime', 'Film-Noir', 'Documentary', 'Sci-Fi', 'Action', 'Animation', 'Mystery', 'IMAX', 'Drama', 'Comedy']
-    Movie_Genre=np.zeros((Movie_num,19))
-    with open(new_MovieAddress, "r",encoding="utf8") as file:
+    Genres=['Thriller', 'Action', 'Western', "Children's", 'Sci-Fi', 'Drama', 'Fantasy', 'War', 'Comedy', 'Romance', 'Crime', 'Musical', 'Mystery', 'Animation', 'Documentary', 'Adventure', 'Horror', 'Film-Noir']
+    Movie_Genre=np.zeros((Movie_num,18))
+    with open(Final_Movie, "r",encoding="utf8") as file:
         csv_reader=csv.reader(file)
         line_count=0
         for row in csv_reader:
@@ -317,7 +320,7 @@ def ShuffleTraining():
 
 def CreateTrainAndTest():
     Ratings=[]
-    with open(new_RatingAddress,"r",encoding="utf8") as file:
+    with open(Final_Ratings,"r",encoding="utf8") as file:
         csv_reader = csv.reader(file)
         line_count = 0
         for row in csv_reader:
@@ -366,7 +369,9 @@ def CheckRatingdistribution():
         for row in csv_reader:
             line_count += 1
             ratingNum[int(row[2])-1]+=1
+    Total=np.sum(ratingNum)
     print(ratingNum)
+    print(ratingNum/Total)
     ratingNum = np.zeros((5))
     with open(ValidationAddress, "r", encoding="utf8") as file:
         csv_reader = csv.reader(file)
@@ -375,6 +380,8 @@ def CheckRatingdistribution():
             line_count += 1
             ratingNum[int(row[2]) - 1] += 1
     print(ratingNum)
+    Total = np.sum(ratingNum)
+    print(ratingNum/Total)
     ratingNum = np.zeros((5))
     with open(TestAddress, "r", encoding="utf8") as file:
         csv_reader = csv.reader(file)
@@ -383,21 +390,207 @@ def CheckRatingdistribution():
             line_count += 1
             ratingNum[int(row[2]) - 1] += 1
     print(ratingNum)
+    Total = np.sum(ratingNum)
+    print(ratingNum/Total)
 
+# "C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/"
+
+one_ratings="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/ratings.dat"
+one_csv_rating="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/ratings.csv"
+one_new_rating="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/ratings.csv"
+one_movie="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/movies.dat"
+one_csv_movie="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/movies.csv"
+one_new_movie="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/movies.csv"
+one_users="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/users.dat"
+one_csv_users="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/users.csv"
+Final_Ratings="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Fratings.csv"
+Final_Movie="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Fmovies.csv"
+Final_User="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Fusers.csv"
+TMPuser="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/tmp_users.csv"
+TMPmovie="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/tmp_movies.csv"
+TMPratings="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/tmp_ratings.csv"
+
+
+
+def DattoCsv():
+    with open(one_users) as file,open(one_csv_users,"w",encoding="utf8",newline='') as csv_file:
+        csv_writer=csv.writer(csv_file)
+        for line in file:
+            row = [field.strip() for field in line.split('::')]
+            csv_writer.writerow(row)
+
+def ListRatingNumber(one_new_rating):
+    User=[[i,0] for i in range(User_num)]
+    Movie=[[i,0] for i in range(Movie_num)]
+    with open(one_new_rating, "r",encoding="utf8") as file:
+        csv_reader = csv.reader(file)
+        linecount=0
+        for row in csv_reader:
+            id_U=int(row[0])
+            id_M=int(row[1])
+            User[id_U][1]+=1
+            Movie[id_M][1]+=1
+    User.sort(key=lambda x:x[1])
+    Movie.sort(key=lambda  x:x[1])
+    print(User)
+    print(Movie)
+    User=[row[0] for row in User]
+    Movie=[row[0] for row in Movie]
+
+    return User,Movie
+
+def LowerAmountofRatings():
+    User,Movie=ListRatingNumber(one_new_rating)
+    with open(one_new_rating, "r",encoding="utf8") as file,open(TMPratings,"w",encoding="utf8",newline='') as WFile:
+        csv_reader = csv.reader(file)
+        csv_writer = csv.writer(WFile)
+        linecount=0
+        for row in csv_reader:
+            id_U=int(row[0])
+            id_M=int(row[1])
+            indx_U=User.index(id_U)
+            indx_M=Movie.index(id_M)
+            if indx_U>=5000 and indx_M>=2000:
+                linecount+=1
+                csv_writer.writerow(row)
+        print(linecount)
+
+def LowMovieAndUser():
+    User, Movie = GetUserandMovieID()
+    with open(one_csv_users,"r",encoding="utf8") as file,open(TMPuser,"w",encoding="utf8",newline='') as WFile:
+        csv_reader =csv.reader(file)
+        csv_writer = csv.writer(WFile)
+        linecount = 0
+        for row in csv_reader:
+            if row[0] in User:
+                linecount+=1
+                csv_writer.writerow(row)
+        print(linecount)
+    linecount=0
+    with open(one_new_movie, "r", encoding="utf8") as file, open(TMPmovie, "w", encoding="utf8", newline='') as WFile:
+        csv_reader = csv.reader(file)
+        csv_writer = csv.writer(WFile)
+        linecount = 0
+        for row in csv_reader:
+            if row[0] in Movie:
+                linecount += 1
+                csv_writer.writerow(row)
+        print(linecount)
+
+def GetUserandMovieID():
+    User=[]
+    Movie=[]
+    with open(TMPratings, "r", encoding="utf8") as file:
+        csv_reader = csv.reader(file)
+        linecount = 0
+        for row in csv_reader:
+            if row[0] not in User:
+                User.append(row[0])
+            if row[1] not in Movie:
+                Movie.append(row[1])
+    print(len(User))
+    print(len(Movie))
+    return User,Movie
+
+def getId(file_adress):
+    ids=[]
+    with open(file_adress, "r", encoding="utf8") as file:
+        csv_reader = csv.reader(file)
+        linecount = 0
+        for row in csv_reader:
+            if row[0] not in ids:
+                ids.append(row[0])
+        print(len(ids))
+    return ids
+
+def FixIds():
+    User=getId(TMPuser)
+    print(User)
+    Movie=getId(TMPmovie)
+    print(Movie)
+    with open(TMPuser, "r", encoding="utf8") as file, open(Final_User, "w", encoding="utf8", newline='') as WFile:
+        csv_reader = csv.reader(file)
+        csv_writer = csv.writer(WFile)
+        linecount = 0
+        for row in csv_reader:
+            id=User.index(row[0])
+            row[0]=str(id)
+            csv_writer.writerow(row)
+    with open(TMPmovie, "r", encoding="utf8") as file, open(Final_Movie, "w", encoding="utf8", newline='') as WFile:
+        csv_reader = csv.reader(file)
+        csv_writer = csv.writer(WFile)
+        linecount = 0
+        for row in csv_reader:
+            id = Movie.index(row[0])
+            row[0] = str(id)
+            csv_writer.writerow(row)
+    with open(TMPratings, "r", encoding="utf8") as file, open(Final_Ratings, "w", encoding="utf8", newline='') as WFile:
+        csv_reader = csv.reader(file)
+        csv_writer = csv.writer(WFile)
+        linecount = 0
+        for row in csv_reader:
+            U_id = User.index(row[0])
+            M_id=Movie.index(row[1])
+            row[0] = str(U_id)
+            row[1] =str(M_id)
+            csv_writer.writerow(row)
+def CreateUserMetaMatrix():
+
+    with open(Final_User, "r", encoding="utf8") as file:
+        GenderOpt=['M','F']
+        AgeOpt=['1','18','25','35','45','50','56']
+        OccupationOpt=['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20']
+        ZipCodeOpt=['0','1','2','3','4','5','6','7','8','9']
+        HotGender = np.zeros((User_num,2))
+        HotAge = np.zeros((User_num,7))
+        HotOcc = np.zeros((User_num,21))
+        HotArea = np.zeros((User_num,10))
+
+
+        csv_reader = csv.reader(file)
+        linecount = 0
+        for row in csv_reader:
+            linecount+=1
+            Id=int(row[0])
+            print(row[0])
+            Gender=row[1]
+            Age=row[2]
+            Occ=row[3]
+            Area=row[4][0]
+            print(GenderOpt.index(Gender)," ",AgeOpt.index(Age)," ",OccupationOpt.index(Occ)," ",ZipCodeOpt.index(Area))
+            HotGender[Id][GenderOpt.index(Gender)]=1
+            HotAge[Id][AgeOpt.index(Age)]=1
+            HotOcc[Id][OccupationOpt.index(Occ)]=1
+            HotArea[Id][ZipCodeOpt.index(Area)]=1
+        # print(HotGender," ",HotAge," ",HotOcc," ",HotArea)
+    np.save(open(Gender_Address,"wb"),HotGender)
+    np.save(open(Age_Address,"wb"),HotAge)
+    np.save(open(Occupation_Address,"wb"),HotOcc)
+    np.save(open(Area_Address,"wb"),HotArea)
 
 if __name__=="__main__":
     print("Burdayım")
-    # CreateTrainAndTest()
-
-    # CreateUserAndMovieMatrix()
-    SeparateandNormalize()
-
-    # CheckRatingdistribution()
-
+    # LowerAmountofRatings()
+    # LowMovieAndUser()
+    # FixIds()
+    # ListRatingNumber(Final_Ratings)
+    # CreateTmpRatings()
+    # TrainValidationTestSplit()
     # ShuffleTraining()
-    # movie=np.load(User_address)
-    # print("Bitti")
-    # print(movie[0][2219])
+    # CreateUserAndMovieMatrix()
+    # SeparateandNormalize()
+    #
+    # CreateTrainAndTest()
+    # CreateValidation()
+    # CreateUserAndMovieMatrix()
+    # SeparateandNormalize()
+
+    # CountGenres()
+    # CreateGenreMatrix()
+    # CreateUserMetaMatrix()
+    Age=np.load(Genre_Address)
+    print(Age[0])
+    # CheckRatingdistribution()
 
 
 
