@@ -21,11 +21,11 @@ from tensorflow.python.keras import optimizers
 
 Epoch_num=1001
 batch_size=500
-Embd_Size=500
+Embd_Size=700
 learning_rate = 0.0001
 momentumRate=0.01
-DropOutRate=0.2
-Scale=0.0225#0.005
+DropOutRate=0.3
+Scale=0.015#0.005
 Scale_emb=0.01 #0.01
 Relu_alpha=0.05
 Training=True
@@ -141,66 +141,66 @@ Conc=Keras.Input((Input_Shape,))
 
 U,M,G1,G2,A1,O,A2=Keras.Lambda(ReturnVektor)(Conc)
 
-U_Drop=Keras.Dropout(DropOutRate)(U)
-M_Drop=Keras.Dropout(DropOutRate)(M)
-G1_Drop=Keras.Dropout(DropOutRate)(G1)
-G2_Drop=Keras.Dropout(DropOutRate)(G2)
-A1_Drop=Keras.Dropout(DropOutRate)(A1)
-O_Drop=Keras.Dropout(DropOutRate)(O)
-A2_Drop=Keras.Dropout(DropOutRate)(A2)
+# U_Drop=Keras.Dropout(DropOutRate)(U)
+# M_Drop=Keras.Dropout(DropOutRate)(M)
+# G1_Drop=Keras.Dropout(DropOutRate)(G1)
+# G2_Drop=Keras.Dropout(DropOutRate)(G2)
+# A1_Drop=Keras.Dropout(DropOutRate)(A1)
+# O_Drop=Keras.Dropout(DropOutRate)(O)
+# A2_Drop=Keras.Dropout(DropOutRate)(A2)
 
-emb1=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(U_Drop)
-emb1_Drop=Keras.Dropout(DropOutRate)(emb1)
-emb1_alt=Keras.Reshape((1,-1))(emb1_Drop)
-emb2=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(M_Drop)
-emb2_Drop=Keras.Dropout(DropOutRate)(emb2)
-emb2_alt=Keras.Reshape((1,-1))(emb2_Drop)
-emb3=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(G1_Drop)
-emb3_Drop=Keras.Dropout(DropOutRate)(emb3)
-emb3_alt=Keras.Reshape((1,-1))(emb3_Drop)
-emb4=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(G2_Drop)
-emb4_Drop=Keras.Dropout(DropOutRate)(emb4)
-emb4_alt=Keras.Reshape((1,-1))(emb4_Drop)
-emb5=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(A1_Drop)
-emb5_Drop=Keras.Dropout(DropOutRate)(emb5)
-emb5_alt=Keras.Reshape((1,-1))(emb5_Drop)
-emb6=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(O_Drop)
-emb6_Drop=Keras.Dropout(DropOutRate)(emb6)
-emb6_alt=Keras.Reshape((1,-1))(emb6_Drop)
-emb7=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(A2_Drop)
-emb7_Drop=Keras.Dropout(DropOutRate)(emb7)
-emb7_alt=Keras.Reshape((1,-1))(emb7_Drop)
+# emb1=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(U_Drop)
+# emb1_Drop=Keras.Dropout(DropOutRate)(emb1)
+# emb1_alt=Keras.Reshape((1,-1))(emb1_Drop)
+# emb2=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(M_Drop)
+# emb2_Drop=Keras.Dropout(DropOutRate)(emb2)
+# emb2_alt=Keras.Reshape((1,-1))(emb2_Drop)
+# emb3=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(G1_Drop)
+# emb3_Drop=Keras.Dropout(DropOutRate)(emb3)
+# emb3_alt=Keras.Reshape((1,-1))(emb3_Drop)
+# emb4=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(G2_Drop)
+# emb4_Drop=Keras.Dropout(DropOutRate)(emb4)
+# emb4_alt=Keras.Reshape((1,-1))(emb4_Drop)
+# emb5=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(A1_Drop)
+# emb5_Drop=Keras.Dropout(DropOutRate)(emb5)
+# emb5_alt=Keras.Reshape((1,-1))(emb5_Drop)
+# emb6=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(O_Drop)
+# emb6_Drop=Keras.Dropout(DropOutRate)(emb6)
+# emb6_alt=Keras.Reshape((1,-1))(emb6_Drop)
+# emb7=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(A2_Drop)
+# emb7_Drop=Keras.Dropout(DropOutRate)(emb7)
+# emb7_alt=Keras.Reshape((1,-1))(emb7_Drop)
 
-# emb1=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(U)
-# # emb1_Drop=Keras.Dropout(DropOutRate)(emb1)
-# emb1_alt=Keras.Reshape((1,-1))(emb1)
-# emb2=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(M)
-# # emb2_Drop=Keras.Dropout(DropOutRate)(emb2)
-# emb2_alt=Keras.Reshape((1,-1))(emb2)
-# emb3=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(G1)
-# # emb3_Drop=Keras.Dropout(DropOutRate)(emb3)
-# emb3_alt=Keras.Reshape((1,-1))(emb3)
-#
-#
-# emb4=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(G2)
-#
-# # emb4_Drop=Keras.Dropout(DropOutRate)(emb4)
-# emb4_alt=Keras.Reshape((1,-1))(emb4)
-#
-# emb5=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(A1)
-#
-# # emb5_Drop=Keras.Dropout(DropOutRate)(emb5)
-# emb5_alt=Keras.Reshape((1,-1))(emb5)
-#
-# emb6=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(O)
-#
-# # emb6_Drop=Keras.Dropout(DropOutRate)(emb6)
-# emb6_alt=Keras.Reshape((1,-1))(emb6)
-#
-# emb7=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(A2)
-#
-# # emb7_Drop=Keras.Dropout(DropOutRate)(emb7)
-# emb7_alt=Keras.Reshape((1,-1))(emb7)
+emb1=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(U)
+# emb1_Drop=Keras.Dropout(DropOutRate)(emb1)
+emb1_alt=Keras.Reshape((1,-1))(emb1)
+emb2=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(M)
+# emb2_Drop=Keras.Dropout(DropOutRate)(emb2)
+emb2_alt=Keras.Reshape((1,-1))(emb2)
+emb3=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(G1)
+# emb3_Drop=Keras.Dropout(DropOutRate)(emb3)
+emb3_alt=Keras.Reshape((1,-1))(emb3)
+
+
+emb4=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(G2)
+
+# emb4_Drop=Keras.Dropout(DropOutRate)(emb4)
+emb4_alt=Keras.Reshape((1,-1))(emb4)
+
+emb5=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(A1)
+
+# emb5_Drop=Keras.Dropout(DropOutRate)(emb5)
+emb5_alt=Keras.Reshape((1,-1))(emb5)
+
+emb6=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(O)
+
+# emb6_Drop=Keras.Dropout(DropOutRate)(emb6)
+emb6_alt=Keras.Reshape((1,-1))(emb6)
+
+emb7=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(A2)
+
+# emb7_Drop=Keras.Dropout(DropOutRate)(emb7)
+emb7_alt=Keras.Reshape((1,-1))(emb7)
 
 
 
@@ -226,8 +226,7 @@ y_fm_2d=Keras.Reshape((Embd_Size,))(y_fm_2d)
 # y_fm_2d = Keras.Reshape((1,), name = 'fm_2d_output')(tensor_sum(sub))
 
 # DenseLayer_Input=Keras.concatenate([emb1_Drop,emb2_Drop,emb3_Drop,emb4_Drop,emb5_Drop,emb6_Drop,emb7_Drop])
-DenseLayer_Input=Keras.concatenate([emb1_Drop,emb2_Drop,emb3_Drop,emb4_Drop,emb5_Drop,emb6_Drop,emb7_Drop])
-
+DenseLayer_Input=Keras.concatenate([emb1,emb2,emb3,emb4,emb5,emb6,emb7])
 
 
 # x1=Keras.Dense(400,activation="relu",  kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(DenseLayer_Input)

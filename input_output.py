@@ -6,6 +6,7 @@ import math
 import random
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import normalize
+import matplotlib.pyplot as plt
 
 
 # User_num=610
@@ -568,6 +569,63 @@ def CreateUserMetaMatrix():
     np.save(open(Occupation_Address,"wb"),HotOcc)
     np.save(open(Area_Address,"wb"),HotArea)
 
+
+ResultDeep="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Results/5_Results/DeepResults.csv"
+ResultFm="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Results/5_Results/FMResults.csv"
+ResultDeepFM="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Results/5_Results/DeepFMResults.csv"
+
+def GetResults(Adress):
+    Results=[]
+    with open(Adress,"r",encoding="utf8") as file:
+        csv_reader=csv.reader(file)
+        for row in file:
+            TMP=row.split(',')
+            TMP[-1]=TMP[-1][:-1]
+            TMP=[float(i) for i in TMP]
+            Results.append(TMP)
+    TEST=[i[0] for i in Results]
+    Training=[i[2] for i in Results if i[2] != -1]
+
+    intervalsTEST=[i*10 for i in range(len(TEST))]
+    intervalsTrain=[i*20 for i in range(len(Training))]
+
+    return intervalsTEST,TEST,intervalsTrain,Training
+
+
+def GraphIt():
+    # FMinterval,FMResult,FMTrainInt,FMTrainResult=GetResults(ResultFm)
+    # Deepinterval,DeepResult,DeepTrainInt,DeepTrainResults=GetResults(ResultDeep)
+    # DeepFMinterval,DeepFMResult,DeepFMTrainInt,DeepFMTrainResults=GetResults(ResultDeepFM)
+    # Comparison=plt.figure('Comparison')
+    # plt.plot(FMinterval,FMResult,Deepinterval,DeepResult,DeepFMinterval,DeepFMResult)
+    # plt.ylim((0.73,0.86))
+    # plt.legend(['FM','Deep','DeepFM'])
+    #
+    # FMFigure=plt.figure('FM')
+    # plt.plot(FMTrainInt,FMTrainResult,FMinterval,FMResult)
+    # plt.legend(['Train','Test'])
+    # plt.ylim((0.6,0.9))
+    #
+    # DeepFigure=plt.figure('Deep')
+    # plt.plot(DeepTrainInt,DeepTrainResults,Deepinterval,DeepResult)
+    # plt.legend(['Train', 'Test'])
+    # plt.ylim((0.7, 0.9))
+    #
+    # DeepFMFigure=plt.figure('DeepFM')
+    # plt.plot(DeepFMTrainInt,DeepFMTrainResults,DeepFMinterval,DeepFMResult)
+    # plt.legend(['Train', 'Test'])
+    # plt.ylim((0.60, 0.9))
+    # plt.show()
+
+    DeepFM_3Int,DeepFM_3R,_,_=GetResults("C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Results/3_Results/DeepFMResults.csv")
+    DeepFM_5Int,DeepFM_5R,_,_=GetResults("C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Results/5_Results/DeepFMResults.csv")
+    DeepFM_7Int,DeepFM_7R,_,_=GetResults("C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Results/7_Results/DeepFMResults.csv")
+
+    plt.plot(DeepFM_3Int,DeepFM_3R,DeepFM_5Int,DeepFM_5R,DeepFM_7Int,DeepFM_7R)
+    plt.legend(['3 Özellik','5 Özellik','7 Özellik'])
+    plt.ylim((0.735,0.77))
+    plt.show()
+
 if __name__=="__main__":
     print("Burdayım")
     # LowerAmountofRatings()
@@ -588,9 +646,11 @@ if __name__=="__main__":
     # CountGenres()
     # CreateGenreMatrix()
     # CreateUserMetaMatrix()
-    Age=np.load(Genre_Address)
-    print(Age[0])
+    # Age=np.load(Genre_Address)
+    # print(Age[0])
     # CheckRatingdistribution()
+
+    GraphIt()
 
 
 

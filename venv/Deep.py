@@ -21,7 +21,7 @@ from tensorflow.python.keras import optimizers
 
 Epoch_num=1001
 batch_size=500
-Embd_Size=300
+Embd_Size=500
 learning_rate = 0.001
 momentumRate=0.01
 DropOutRate=0.2
@@ -180,7 +180,7 @@ print(model.summary())
 # model.add(Keras.Dense(400,activation='relu',kernel_regularizer=regularizers.l2(Scale)))
 # model.add(Keras.Dropout(DropOutRate))
 # model.add(Keras.Dense(1, activation='linear',kernel_regularizer=regularizers.l2(Scale)))
-Opt=optimizers.Adam(lr=learning_rate)
+Opt=optimizers.SGD(lr=learning_rate)
 model.compile(loss='mse', optimizer=Opt, metrics=['mse','mae'])
 
 init=tf.global_variables_initializer()
