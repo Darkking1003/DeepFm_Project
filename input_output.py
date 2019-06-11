@@ -32,32 +32,7 @@ ValidationAddress="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/
 TestAddress="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Test_data.csv"
 User_MovieAdress="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/UserMovie_data"
 
-# User_Movie=np.load("C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-latest-small/Processed/User-Movie")
-# User_Movie=User_Movie.T
-# print(len(User_Movie[0]))
-#
-# Sum=[np.sum(User_Movie[i]) for i in range(Movie_num)]
-# print(len(Sum))
-# Howmany=np.zeros((Movie_num))
-# Howmany[0]=1
-# for i in range(Movie_num):
-#     for j in range(User_num):
-#         if(User_Movie[i][j]!=0):
-#             Howmany[i]+=1
-#     if(Howmany[i]==0):
-#         Howmany[i]=1
-#
-# Mean=Sum/Howmany
-# print(len(Mean))
-#
-# for i in range(Movie_num):
-#     for j in range(User_num):
-#         if(User_Movie[i][j]!=0):
-#             User_Movie[i][j]=User_Movie[i][j]-Mean[i]
-#
-# print(User_Movie)
-# np.save("C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-latest-small/Processed/Movie",User_Movie)
-
+# Function to count amount of ratings and a chosen column unique numbers(User id or Movie id)
 def CountUserAndRatingNum(Rating_Address,i):
     Users=set()
     with open(Rating_Address, "r",encoding="utf8") as file:
@@ -71,6 +46,8 @@ def CountUserAndRatingNum(Rating_Address,i):
 
     print(" User Count: ",len(Users)," ratings number: ",line_count)
 
+
+#  A function to fix Movie ids by giving them new ones. also changes rating file
 def FixMovies(MovieInfo_Address,new_MovieAddress,Rating_Address,new_RatingAddress):
     with open(MovieInfo_Address, encoding="utf8") as file:
         csv_reader=csv.reader(file)
@@ -110,6 +87,8 @@ def FixMovies(MovieInfo_Address,new_MovieAddress,Rating_Address,new_RatingAddres
             #     rating=1
             writer.writerow([row[0],str(newId),row[2],row[3]])
 
+
+# First step to split train test validation. it takes ever user rating and saves them based on their user id. then it sorts them based on time stamp
 def CreateTmpRatings():
     tmp_file=open(tmp_Ratings,"wb")
     for i in range(User_num):
@@ -129,6 +108,7 @@ def CreateTmpRatings():
         pickle.dump(User_rating,tmp_file)
     tmp_file.close()
 
+# Split condition here is time stamp. latest ratings goes to test while older ratings goes to the training.
 def TrainValidationTestSplit():
     tmp_R=open(tmp_Ratings,"rb")
     TrainFile=open(TrainingAddress,"w",encoding="utf8",newline='')
@@ -170,7 +150,7 @@ def TrainValidationTestSplit():
     TestFile.close()
     tmp_R.close()
 
-
+# Creates User And Movie Matrix with Training ratings.
 def CreateUserAndMovieMatrix():
     a=1
     User_Movie=np.zeros((User_num,Movie_num))
@@ -187,34 +167,11 @@ def CreateUserAndMovieMatrix():
             User_Movie[userid,movieid]=rating
     print(User_Movie[112][260])
 
-    # with open(ValidationAddress, "r", encoding="utf8") as file:
-    #     csv_reader = csv.reader(file)
-    #     line_count = 0
-    #
-    #     for row in csv_reader:
-    #         line_count += 1
-    #         userid = int(row[0])
-    #         movieid = int(row[1])
-    #         rating = int(float(row[2]))
-    #
-    #         User_Movie[userid, movieid] = rating
-
-    # with open(TestAddress, "r", encoding="utf8") as file:
-    #     csv_reader = csv.reader(file)
-    #     line_count = 0
-    #
-    #     for row in csv_reader:
-    #         line_count += 1
-    #         userid = int(row[0])
-    #         movieid = int(row[1])
-    #         rating = int(float(row[2]))
-    #         if(userid==553 and movieid==821):
-    #             print("Rating is: ",rating)
-    #         User_Movie[userid, movieid] = rating
     print(User_Movie[0][789])
     save_file=open(User_MovieAdress,"wb")
     np.save(save_file,User_Movie)
 
+# it separates user and movie matrix as User matrix in which user ids are at line and movie matrix in which movie ids are at line. at last it normilizes both by their lines.
 def SeparateandNormalize():
     User_Movie=np.load(User_MovieAdress)
     print(User_Movie[265][414])
@@ -270,6 +227,8 @@ def SeparateandNormalize():
     print(User_Movie)
     np.save(Movie_Address, User_Movie)
 
+
+#  Count the total amount of unique genres and lists them
 def CountGenres():
     Genres=set()
     with open(Final_Movie, "r",encoding="utf8") as file:
@@ -286,6 +245,8 @@ def CountGenres():
         print(Genres)
         print(len(Genres))
 
+
+# Creates Genre Matrix from movies.csv
 def CreateGenreMatrix():
     Genres=['Thriller', 'Action', 'Western', "Children's", 'Sci-Fi', 'Drama', 'Fantasy', 'War', 'Comedy', 'Romance', 'Crime', 'Musical', 'Mystery', 'Animation', 'Documentary', 'Adventure', 'Horror', 'Film-Noir']
     Movie_Genre=np.zeros((Movie_num,18))
@@ -304,6 +265,8 @@ def CreateGenreMatrix():
     save_file=open(Genre_Address,"wb")
     np.save(save_file,Movie_Genre)
 
+
+# when separated by time stamp ratings are not shuffled. this function was made to shuffle such ratngs.
 def ShuffleTraining():
     Training=list()
     with open(TrainingAddress, "r",encoding="utf8") as file:
@@ -319,6 +282,8 @@ def ShuffleTraining():
     TrainWriter = csv.writer(TrainFile)
     TrainWriter.writerows(Training)
 
+
+# Creates Training and test files randomly.
 def CreateTrainAndTest():
     Ratings=[]
     with open(Final_Ratings,"r",encoding="utf8") as file:
@@ -345,6 +310,7 @@ def CreateTrainAndTest():
     ValidationWriter.writerows(valid)
     print("Total:",len(Ratings)," Test: ",len(test)," Train: ",len(train_R)," Valid: ",len(valid))
 
+# Creates Validation Randomly.
 def CreateValidation():
     Training = list()
     with open(TrainingAddress, "r", encoding="utf8") as file:
@@ -362,6 +328,7 @@ def CreateValidation():
     ValidationWriter = csv.writer(ValidationFile)
     ValidationWriter.writerows(valid)
 
+# Checks rating distribution in Train Validation and Test files. it checks rating percentages to make sure ratings are distributed equally.
 def CheckRatingdistribution():
     ratingNum=np.zeros((5))
     with open(TrainingAddress, "r", encoding="utf8") as file:
@@ -412,7 +379,7 @@ TMPmovie="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/tmp_movie
 TMPratings="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/tmp_ratings.csv"
 
 
-
+# Changes .Dat to .Csv
 def DattoCsv():
     with open(one_users) as file,open(one_csv_users,"w",encoding="utf8",newline='') as csv_file:
         csv_writer=csv.writer(csv_file)
@@ -420,6 +387,7 @@ def DattoCsv():
             row = [field.strip() for field in line.split('::')]
             csv_writer.writerow(row)
 
+# It lists amount of ratings a user has given and a movie has taken from small to big.
 def ListRatingNumber(one_new_rating):
     User=[[i,0] for i in range(User_num)]
     Movie=[[i,0] for i in range(Movie_num)]
@@ -440,6 +408,7 @@ def ListRatingNumber(one_new_rating):
 
     return User,Movie
 
+# Lowers amount of ratings with User and movie elimination. only the users which gave the most ratings and movie that has more rating are selected.
 def LowerAmountofRatings():
     User,Movie=ListRatingNumber(one_new_rating)
     with open(one_new_rating, "r",encoding="utf8") as file,open(TMPratings,"w",encoding="utf8",newline='') as WFile:
@@ -456,6 +425,7 @@ def LowerAmountofRatings():
                 csv_writer.writerow(row)
         print(linecount)
 
+# Based on the Lowered ratings it deletes users and movies that are eliminated.
 def LowMovieAndUser():
     User, Movie = GetUserandMovieID()
     with open(one_csv_users,"r",encoding="utf8") as file,open(TMPuser,"w",encoding="utf8",newline='') as WFile:
@@ -478,6 +448,7 @@ def LowMovieAndUser():
                 csv_writer.writerow(row)
         print(linecount)
 
+# get user and movie ids that are not eliminated.
 def GetUserandMovieID():
     User=[]
     Movie=[]
@@ -493,6 +464,7 @@ def GetUserandMovieID():
     print(len(Movie))
     return User,Movie
 
+# this does the same thing as GetUserandMovieID function does but it only scans the User and Movie files not the big ratings file.
 def getId(file_adress):
     ids=[]
     with open(file_adress, "r", encoding="utf8") as file:
@@ -504,6 +476,7 @@ def getId(file_adress):
         print(len(ids))
     return ids
 
+# This function fixes the ids of selected users and movies and updates ratings file.
 def FixIds():
     User=getId(TMPuser)
     print(User)
@@ -535,6 +508,8 @@ def FixIds():
             row[0] = str(U_id)
             row[1] =str(M_id)
             csv_writer.writerow(row)
+
+# This function creates feature matrixs of User information like: Gender,Age,Occupation and area
 def CreateUserMetaMatrix():
 
     with open(Final_User, "r", encoding="utf8") as file:
@@ -574,6 +549,8 @@ ResultDeep="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Results/5_Results
 ResultFm="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Results/5_Results/FMResults.csv"
 ResultDeepFM="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Results/5_Results/DeepFMResults.csv"
 
+
+# this two function was made to visualize the results of our models
 def GetResults(Adress):
     Results=[]
     with open(Adress,"r",encoding="utf8") as file:
@@ -593,38 +570,38 @@ def GetResults(Adress):
 
 
 def GraphIt():
-    # FMinterval,FMResult,FMTrainInt,FMTrainResult=GetResults(ResultFm)
-    # Deepinterval,DeepResult,DeepTrainInt,DeepTrainResults=GetResults(ResultDeep)
-    # DeepFMinterval,DeepFMResult,DeepFMTrainInt,DeepFMTrainResults=GetResults(ResultDeepFM)
-    # Comparison=plt.figure('Comparison')
-    # plt.plot(FMinterval,FMResult,Deepinterval,DeepResult,DeepFMinterval,DeepFMResult)
-    # plt.ylim((0.73,0.86))
-    # plt.legend(['FM','Deep','DeepFM'])
-    #
-    # FMFigure=plt.figure('FM')
-    # plt.plot(FMTrainInt,FMTrainResult,FMinterval,FMResult)
-    # plt.legend(['Train','Test'])
-    # plt.ylim((0.6,0.9))
-    #
-    # DeepFigure=plt.figure('Deep')
-    # plt.plot(DeepTrainInt,DeepTrainResults,Deepinterval,DeepResult)
-    # plt.legend(['Train', 'Test'])
-    # plt.ylim((0.7, 0.9))
-    #
-    # DeepFMFigure=plt.figure('DeepFM')
-    # plt.plot(DeepFMTrainInt,DeepFMTrainResults,DeepFMinterval,DeepFMResult)
-    # plt.legend(['Train', 'Test'])
-    # plt.ylim((0.60, 0.9))
-    # plt.show()
+    FMinterval,FMResult,FMTrainInt,FMTrainResult=GetResults(ResultFm)
+    Deepinterval,DeepResult,DeepTrainInt,DeepTrainResults=GetResults(ResultDeep)
+    DeepFMinterval,DeepFMResult,DeepFMTrainInt,DeepFMTrainResults=GetResults(ResultDeepFM)
+    Comparison=plt.figure('Comparison')
+    plt.plot(FMinterval,FMResult,Deepinterval,DeepResult,DeepFMinterval,DeepFMResult)
+    plt.ylim((0.73,0.86))
+    plt.legend(['FM','Deep','DeepFM'])
 
-    DeepFM_3Int,DeepFM_3R,_,_=GetResults("C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Results/3_Results/DeepFMResults.csv")
-    DeepFM_5Int,DeepFM_5R,_,_=GetResults("C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Results/5_Results/DeepFMResults.csv")
-    DeepFM_7Int,DeepFM_7R,_,_=GetResults("C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Results/7_Results/DeepFMResults.csv")
+    FMFigure=plt.figure('FM')
+    plt.plot(FMTrainInt,FMTrainResult,FMinterval,FMResult)
+    plt.legend(['Train','Test'])
+    plt.ylim((0.6,0.9))
 
-    plt.plot(DeepFM_3Int,DeepFM_3R,DeepFM_5Int,DeepFM_5R,DeepFM_7Int,DeepFM_7R)
-    plt.legend(['3 Özellik','5 Özellik','7 Özellik'])
-    plt.ylim((0.735,0.77))
+    DeepFigure=plt.figure('Deep')
+    plt.plot(DeepTrainInt,DeepTrainResults,Deepinterval,DeepResult)
+    plt.legend(['Train', 'Test'])
+    plt.ylim((0.7, 0.9))
+
+    DeepFMFigure=plt.figure('DeepFM')
+    plt.plot(DeepFMTrainInt,DeepFMTrainResults,DeepFMinterval,DeepFMResult)
+    plt.legend(['Train', 'Test'])
+    plt.ylim((0.60, 0.9))
     plt.show()
+
+    # DeepFM_3Int,DeepFM_3R,_,_=GetResults("C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Results/3_Results/DeepFMResults.csv")
+    # DeepFM_5Int,DeepFM_5R,_,_=GetResults("C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Results/5_Results/DeepFMResults.csv")
+    # DeepFM_7Int,DeepFM_7R,_,_=GetResults("C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Results/7_Results/DeepFMResults.csv")
+    #
+    # plt.plot(DeepFM_3Int,DeepFM_3R,DeepFM_5Int,DeepFM_5R,DeepFM_7Int,DeepFM_7R)
+    # plt.legend(['3 Özellik','5 Özellik','7 Özellik'])
+    # plt.ylim((0.735,0.77))
+    # plt.show()
 
 if __name__=="__main__":
     print("Burdayım")
@@ -650,8 +627,9 @@ if __name__=="__main__":
     # print(Age[0])
     # CheckRatingdistribution()
 
-    GraphIt()
+    # GraphIt()
 
+    ListRatingNumber(Final_Ratings)
 
 
 

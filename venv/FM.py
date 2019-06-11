@@ -41,9 +41,7 @@ Training=True
 # Validation_data="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-latest-small/Processed/Validation_data.csv"
 # Test_data="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-latest-small/Processed/Test_data.csv"
 #
-User_num=1041
-Movie_num=1883
-#
+# Addresses For Input Matrices
 User_address="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/User_data.npy"
 Movie_Address="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Movie_data.npy"
 Genre_Address="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Genre.npy"
@@ -52,12 +50,14 @@ Age_Address="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Age.np
 Occupation_Address="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Occupation.npy"
 Area_Address="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Area.npy"
 #
+# Addresses For Input Ratings
 Train_data="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Training_data.csv"
 Validation_data="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Validation_data.csv"
 Test_data="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Processed/Test_data.csv"
-
+# Address for Saving Results
 Results_Adress="C:/Users/musta/OneDrive/Masaüstü/MovieLens/ml-1m/Results/FMResults.csv"
 
+# Input Matrices to be used
 User=np.load(User_address)
 Movie=np.load(Movie_Address)
 Genre=np.load(Genre_Address)
@@ -66,14 +66,20 @@ Age=np.load(Age_Address)
 Occupation=np.load(Occupation_Address)
 Area=np.load(Area_Address)
 
+# Amount of column each feature has
 Amount={'User':Movie_num,'Movie':User_num,'Genre':18,'Gender':2,'Age':7,'Occupation':21,'Area':10}
+# Features to be used. if you want ot run it on lower feature or add more feature change this.
 Features={'Genre':Genre,'Gender':Gender,'Age':Age,'Occupation':Occupation,'Area':Area}
+# Features which selected by User Id
 UserId_Features=['User','Gender','Age','Occupation','Area']
+# Features which selected by Movie Id
 MovieId_Features=['Movie','Genre']
 
 Input_Shape=10
 Input_Indexs={'User':[0,Movie_num],'Movie':[Movie_num,Movie_num+User_num]}
 
+
+# A Functon that determines column size of input
 def InputShape():
     Total=Amount['User']+Amount['Movie']
     for feature in Features.keys():
@@ -85,7 +91,7 @@ def InputShape():
 Input_Shape=InputShape()
 print(Input_Shape)
 
-
+# A Function which Creates Input to be sent into model
 def CreateInput(Userid,MovieId):
     Input=np.concatenate((User[Userid],Movie[MovieId]),axis=1)
     for feature in Features.keys():
@@ -96,6 +102,7 @@ def CreateInput(Userid,MovieId):
     return Input
 
 
+#Where Input is taken with tensorfow data pipeline
 with tf.name_scope("Batch"):
     record_defaults = [tf.int32,tf.int32,tf.float32]
     Dataset=tf.data.experimental.CsvDataset(Train_data,record_defaults)
@@ -115,12 +122,6 @@ with tf.name_scope("Batch"):
     Validation_iterator = Validation_set.make_initializable_iterator()
     next_Validation = Validation_iterator.get_next()
 print(Input_Indexs)
-def ReturnUser(Input):
-    return Input[:,0:Movie_num]
-def ReturnMovie(Input):
-    return Input[:,Movie_num:Movie_num+User_num]
-def ReturnGenre(Input):
-    return Input[:,Movie_num+User_num:Movie_num+User_num+Amount['Genre']]
 
 def ReturnVektor(Input):
     User=Input[:,Input_Indexs['User'][0]:Input_Indexs['User'][1]]
@@ -133,19 +134,14 @@ def ReturnVektor(Input):
 def root_mean_squared_error(y_true, y_pred):
     return K.sqrt(K.mean(K.square(y_pred - y_true)))
 
-# User_Input=Keras.Input((Movie_num,))
-# Movie_Input=Keras.Input((User_num,))
-Conc=Keras.Input((Input_Shape,),name='Mix_Input')
-# U=Keras.Lambda(ReturnUser,output_shape=(User_num,))(Conc)
-# M=Keras.Lambda(ReturnMovie,output_shape=(User_num,))(Conc)
-# G1=Keras.Lambda(ReturnGenre,output_shape=(User_num,))(Conc)
+# Input is one big matrix because if put separetly training time grows very big.
+Conc=Keras.Input((Input_Shape,))
 
-# U=Keras.Lambda(ReturnVektor,output_shape=(User_num,))([Conc,'User'])
-# M=Keras.Lambda(ReturnVektor,output_shape=(User_num,))([Conc,'Movie'])
-# G1=Keras.Lambda(ReturnVektor,output_shape=(User_num,))([Conc,'Genre'])
-
+# Features are separeted
 U,M,G1,G2,A1,O,A2=Keras.Lambda(ReturnVektor)(Conc)
 
+
+# Embedding Layer. Reshape is for concatenate
 emb1=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(U)
 emb1=Keras.Reshape((1,Embd_Size))(emb1)
 emb2=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(M)
@@ -160,64 +156,50 @@ emb6=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kerne
 emb6=Keras.Reshape((1,Embd_Size))(emb6)
 emb7=Keras.Dense(Embd_Size,activation='linear',kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(A2)
 emb7=Keras.Reshape((1,Embd_Size))(emb7)
-# DenseLayer_Input=Keras.concatenate([emb1,emb2])
 
+# First Order Relations
 y_fm_1d=Keras.Dense(1,activation='linear',kernel_regularizer=regularizers.l2(Scale))(Conc)
 
-
+# Here every feature becomes a line. it's not column wise its line wise
 embed_2d=Keras.Concatenate(axis=1)([emb1,emb2,emb3,emb4,emb5,emb6,emb7])
 
+# Function to add all features line wise. Output Shape=>(None,1,Embd_Size)
 tensor_sum = Keras.Lambda(lambda x: K.sum(x, axis = 1), name = 'sum_of_tensors')
+# Function that squares every number. OUtput Shape=>(None,p,Embddd_Size)  p is number of features
 tensor_square = Keras.Lambda(lambda x: K.square(x), name = 'square_of_tensors')
 
+# Sum of embeddings. Shape = (None, 1 , Embed_Size)
 sum_of_embed = tensor_sum(embed_2d)
+# Squares of embeddings Shape = (None,p, Embed_Size)
 square_of_embed = tensor_square(embed_2d)
 
+# Square of embedding sum Shape=(None,1,Embed_Size)
 square_of_sum = Keras.Multiply()([sum_of_embed, sum_of_embed])
+# Sum of embeddings which squares were taken. Shape = (None,1,Embd_Size)
 sum_of_square = tensor_sum(square_of_embed)
 
+# Substraction of sum of sqares and squares of sums
 sub = Keras.Subtract()([square_of_sum, sum_of_square])
+# Second order is the half of sub
 y_fm_2d = Keras.Lambda(lambda x: x*0.5)(sub)
-# y_fm_2d = Keras.Reshape((1,), name = 'fm_2d_output')(tensor_sum(sub))
-
-
-# x1=Keras.Dense(400,activation="relu",  kernel_initializer='normal',kernel_regularizer=regularizers.l2(Scale))(DenseLayer_Input)
-# x1=Keras.Dense(400,activation="relu",kernel_regularizer=regularizers.l2(Scale))(DenseLayer_Input)
-# drop1=Keras.Dropout(DropOutRate)(x1)
-# x2=Keras.Dense(400,activation="relu",kernel_regularizer=regularizers.l2(Scale) )(drop1)
-# drop2=Keras.Dropout(DropOutRate)(x2)
-# x3=Keras.Dense(400,activation="relu",kernel_regularizer=regularizers.l2(Scale))(drop2)
-# drop3=Keras.Dropout(DropOutRate)(x3)
 
 y=Keras.Concatenate()([y_fm_1d,y_fm_2d])
+# Output layer
 Output=Keras.Dense(1, activation='linear',kernel_regularizer=regularizers.l2(Scale))(y)
 
 model=tf.keras.Model(inputs=[Conc],outputs=Output)
 print(model.summary())
 
-
-# model = Sequential()
-# model.add(Keras.Dropout(DropOutRate,input_shape=(10352,)))
-# model.add(Keras.Dense(400, input_dim=10352, kernel_initializer='normal', activation='relu',kernel_regularizer=regularizers.l2(Scale)))
-# model.add(Keras.Dropout(DropOutRate))
-# model.add(Keras.Dense(400, activation='relu',kernel_regularizer=regularizers.l2(Scale)))
-# model.add(Keras.Dropout(DropOutRate))
-# model.add(Keras.Dense(400,activation='relu',kernel_regularizer=regularizers.l2(Scale)))
-# model.add(Keras.Dropout(DropOutRate))
-# model.add(Keras.Dense(400,activation='relu',kernel_regularizer=regularizers.l2(Scale)))
-# model.add(Keras.Dropout(DropOutRate))
-# model.add(Keras.Dense(1, activation='linear',kernel_regularizer=regularizers.l2(Scale)))
-Opt=optimizers.Adam(lr=learning_rate)
+Opt=optimizers.SGD(lr=learning_rate)
 model.compile(loss='mse', optimizer=Opt, metrics=['mse','mae'])
 
-init=tf.global_variables_initializer()
+init = tf.global_variables_initializer()
 
 init_op_train = train_iterator.initializer
 init_op_test = test_iterator.initializer
-init_op_valid=Validation_iterator.initializer
+init_op_valid = Validation_iterator.initializer
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
-
 File = open(Results_Adress, "w", encoding="utf8", newline='')
 File.close()
 with tf.Session(config=config) as sess:
@@ -225,31 +207,28 @@ with tf.Session(config=config) as sess:
     for epoch in range(Epoch_num):
         sess.run(init_op_train)
         Training = True
-        print("!!!!!!!!!!!!!!!!!!!!!!!Epoch: ",epoch)
+        print("!!!!!!!!!!!!!!!!!!!!!!!Epoch: ", epoch)
         try:
-            i=0
+            i = 0
             print(time.strftime('%H:%M:%S GMT', time.localtime()))
             while True:
-                i+=1
-                start=time.time()
-                batch=sess.run(next_element)
+                i += 1
+                start = time.time()
+                # From data pipeline we recieve userId,MovieId and labels
+                batch = sess.run(next_element)
                 labels = batch[2].astype(float).round().astype(int)
-                read_time=time.time()
-                input=CreateInput(batch[0],batch[1])
-                # input=[User[batch[0]],Movie[batch[1]]]
-                input_time=time.time()
-                # print(i)
-                model.fit(input,labels,batch_size=len(input),epochs=1,verbose=0)
-                # Deneme=model.predict(input)
-                # print(Deneme)
-                # print(len(Deneme))
-                # print(len(Deneme[0]))
-                # print(len(Deneme[0][0]))
-                # print()
-                train_time=time.time()
+                read_time = time.time()
+                input = CreateInput(batch[0], batch[1])
+                input_time = time.time()
+
+                model.fit(input, labels, batch_size=len(input), epochs=1, verbose=0)
+
+                train_time = time.time()
                 # print("Read Time: ",read_time-start," Input Time: ",input_time-read_time," Train Time: ",train_time-input_time)
         except tf.errors.OutOfRangeError:
             pass
+
+        # Find Validation Success. Its Commented because of recents test not requiring validation results
 
         # sess.run(init_op_valid)
         # Training = False
@@ -272,23 +251,17 @@ with tf.Session(config=config) as sess:
         # print(model.metrics_names)
         # print("Total Validation Success: ", result)
 
-        # if(epoch%10 ==0):
-        #     pred=model.predict(input)
-        #     print("Prediction: ",pred," True Value: ",labels)
-        #     print(Deneme)
-
-
-        if epoch %20 ==0:
+        if epoch % 20 == 0:
+            # Find Training Success
             sess.run(init_op_train)
             Training = False
             try:
-                Total = [0,0,0]
+                Total = [0, 0, 0]
                 i = 0
                 while True:
                     batch = sess.run(next_element)
                     labels = batch[2].astype(float).round().astype(int)
-                    input=CreateInput(batch[0],batch[1])
-                    # input=(User[batch[0]],Movie[batch[1]])
+                    input = CreateInput(batch[0], batch[1])
                     Total = list(map(operator.add, Total, model.evaluate(input, labels, verbose=0)))
                     i += 1
 
@@ -296,10 +269,11 @@ with tf.Session(config=config) as sess:
                 pass
             result = [x / i for x in Total]
             print("Total Training Success: ", result)
-            Train_Result=[result[1],result[2]]
+            Train_Result = [result[1], result[2]]
         else:
-            Train_Result=[-1,-1]
+            Train_Result = [-1, -1]
         if epoch % 10 == 0:
+            # Find Test Results
             sess.run(init_op_test)
             Training = False
             try:
@@ -309,7 +283,6 @@ with tf.Session(config=config) as sess:
                     batch = sess.run(next_test)
                     labels = batch[2].astype(float).round().astype(int)
                     input = CreateInput(batch[0], batch[1])
-                    # input=(User[batch[0]],Movie[batch[1]])
                     Total = list(map(operator.add, Total, model.evaluate(input, labels, verbose=0)))
                     i += 1
 
@@ -317,10 +290,11 @@ with tf.Session(config=config) as sess:
                 pass
             result = [x / i for x in Total]
             print("Total Test Success: ", result)
-            Test_Result = [result[1],result[2]]
-            Result=[Test_Result[0],Test_Result[1],Train_Result[0],Train_Result[1]]
+
+            # Write These results to a file which addressed by 'Results_Adress'
+            Test_Result = [result[1], result[2]]
+            Result = [Test_Result[0], Test_Result[1], Train_Result[0], Train_Result[1]]
             File = open(Results_Adress, "a+", encoding="utf8", newline='')
             csv_writer = csv.writer(File)
             csv_writer.writerow(Result)
             File.close()
-
